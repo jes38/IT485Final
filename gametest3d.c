@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 	int specMode;
 	int editormode;
 	int editorselection;
+	int levelselected;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -109,8 +110,9 @@ int main(int argc, char *argv[])
 	realTurrRot = 0;
 	editormode = 0; //0=editorOff 1=selection 2=place
 	editorselection = 0;
+	levelselected = 0;
 
-	playerShip = spawnShip(space, vec3d(0,0,0), 1);
+	playerShip = spawnShip(space, vec3d(0,0,0), 1, 0);
 	selectedShip = playerShip;
 
     while (bGameLoopRunning)
@@ -172,6 +174,31 @@ int main(int argc, char *argv[])
 				{
 					startLevel(space, 3);
 				}
+				else if (e.key.keysym.sym == SDLK_4)
+				{
+					startLevel(space, 4);
+				}
+				else if (e.key.keysym.sym == SDLK_5)
+				{
+					startLevel(space, 5);
+				}
+				else if (e.key.keysym.sym == SDLK_6)
+				{
+					startLevel(space, 6);
+				}
+				else if (e.key.keysym.sym == SDLK_7)
+				{
+					startLevel(space, 7);
+				}
+				else if (e.key.keysym.sym == SDLK_8)
+				{
+					startLevel(space, 8);
+				}
+				else if (e.key.keysym.sym == SDLK_9)
+				{
+					startLevel(space, 9);
+				}
+				
 
 				else if (editormode == 0)
 				{
@@ -304,27 +331,26 @@ int main(int argc, char *argv[])
 
 				else if (editormode > 0)
 				{
-					if (e.key.keysym.sym == SDLK_s)
-					{
-						editormode = 1;
-					}
-					else if (e.key.keysym.sym == SDLK_p)
-					{
-						editormode = 2;
-					}
+					cameraPosition.x = selectedShip->hull->body.position.x;
+					cameraPosition.z = (selectedShip->hull->body.position.z - 70);
 
-					else if (editormode == 1)
-					{
-						cameraPosition.x = selectedShip->hull->body.position.x;
-						cameraPosition.z = (selectedShip->hull->body.position.z - 70);
-						
-						if (e.key.keysym.sym == SDLK_UP)
+						if (e.key.keysym.sym == SDLK_p) //p for place
+						{
+							Ship *newShip = spawnShip(space, vec3d((selectedShip->hull->body.position.x + 10), 0, (selectedShip->hull->body.position.z + 10)), 1, 0);
+							selectedShip = newShip;
+							editorselection = selectedShip->shipID;
+						}
+						else if (e.key.keysym.sym == SDLK_BACKSPACE && levelselected != 0)
+						{
+							saveLevel(levelselected);
+						}
+						else if (e.key.keysym.sym == SDLK_UP)
 						{
 							editorselection += 1;
 							editorselection = scanForNext(editorselection);
 							selectedShip = returnShip(editorselection);
 						}
-						else if (e.key.keysym.sym == SDLK_d && selectedShip->shipID != 0)
+						else if (e.key.keysym.sym == SDLK_r && selectedShip->shipID != 0) //r for remove
 						{
 							freeShip(selectedShip);
 							
@@ -356,11 +382,6 @@ int main(int argc, char *argv[])
 						{
 							selectedShip->rot -= 1;
 						}
-					}
-					else if (editormode == 2)
-					{
-						
-					}
 				}
             }
         }

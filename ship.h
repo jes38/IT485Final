@@ -87,7 +87,7 @@ void takeShipInput(Ship *ship);
  * @param spawnPt The point where the ship will spawn 
  * @param shipType The type of ship to spawn 
  */
-Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType);
+Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType, float rotation);
 
 /**
  * @brief search ship list for next ship in use
@@ -96,5 +96,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType);
 int scanForNext(int start);
 
 Ship *returnShip(int id);
+
+void saveLevel(int levNum);
 
 #endif

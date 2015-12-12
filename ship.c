@@ -223,7 +223,7 @@ void takeShipInput(Ship *ship)
 	
 }
 
-Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
+Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType, float rotation)
 {
 	Ship *ship;
 	ship = newShip();
@@ -231,7 +231,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	ship->inuse = 1;
 	ship->shipType = shipType;
 	ship->shipID = numShips;
-	ship->rot = 0;
+	ship->rot = rotation;
 	numShips++;
 
 	ship->acc = vec3d(0,0,0);
@@ -339,4 +339,34 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	}
 
 	return ship;
+}
+
+void saveLevel(int levNum)
+{
+	int i;
+	FILE *fileptr;
+	
+	char *filepath = NULL;
+	if(levNum == 1){filepath = "1";}
+	else if(levNum == 2){filepath = "2";}
+	else if(levNum == 3){filepath = "3";}
+	else if(levNum == 4){filepath = "4";}
+	else if(levNum == 5){filepath = "5";}
+	else if(levNum == 6){filepath = "6";}
+	else if(levNum == 7){filepath = "7";}
+	else if(levNum == 8){filepath = "8";}
+	else if(levNum == 9){filepath = "9";}
+
+    fileptr = fopen(filepath,"w");
+
+    for (i = 0;i < maxShips;i++)
+    {
+        if (shipList[i].inuse)
+        {
+            Ship *ship = &shipList[i];
+			fprintf(fileptr,"Ship: %i %f %f %f %f\n", ship->shipType, ship->hull->body.position.x, ship->hull->body.position.y, ship->hull->body.position.z, ship->rot);
+        }
+    }
+
+    fclose(fileptr);
 }
