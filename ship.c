@@ -87,6 +87,36 @@ void freeAllShips(int notPlayer)
 	}
 }
 
+int scanForNext(int start)
+{
+	int i;
+    for (i = start; i < maxShips;i++)
+    {
+        if (shipList[i].inuse)
+        {
+			return i;
+		}
+	}
+	return 0;
+}
+
+Ship *returnShip(int id)
+{
+	Ship *ship;
+	int i;
+    for (i = 0; i < maxShips;i++)
+    {
+        if (shipList[i].shipID == id)
+        {
+			ship = &shipList[i];
+			return ship;
+		}
+	}
+
+	ship = &shipList[0];
+	return ship;
+}
+
 void updateShipPos(Ship *ship)
 {
 	if (!ship)return;
@@ -94,6 +124,12 @@ void updateShipPos(Ship *ship)
 	if(ship->shipID == 0)
 	{
 		takeShipInput(ship);
+	}
+	else
+	{
+		ship->hull->rotation.y = ship->rot;
+		ship->turret->rotation.y = ship->rot; //temporary. this will change after I add AI
+		ship->gun->rotation.y = ship->rot; //temporary. this will change after I add AI
 	}
 
 	vec3d_add(ship->vel,ship->vel,ship->acc);
@@ -104,24 +140,33 @@ void componentInherit(Ship *ship) //all the bodies that the ship is composed of 
 {
 	if(turretRot < 0){realTurrRot = turretRot + 360;}
 	else {realTurrRot = turretRot;}
-	realTurrRot += shipRot;
+	realTurrRot += ship->rot;
 	if (realTurrRot >= 360){realTurrRot -= 360;}
 
 	if(ship->shipID == 0)
 	{
-		ship->turret->body.position.x = ((ship->turrOff.z * -sin(shipRot * DEGTORAD)) + ship->hull->body.position.x);
-		ship->turret->body.position.z = ((ship->turrOff.z * cos(shipRot * DEGTORAD)) + ship->hull->body.position.z);
+		ship->turret->body.position.x = ((ship->turrOff.z * -sin(ship->rot * DEGTORAD)) + ship->hull->body.position.x);
+		ship->turret->body.position.z = ((ship->turrOff.z * cos(ship->rot * DEGTORAD)) + ship->hull->body.position.z);
 
 		ship->gun->body.position.x = ((ship->gunOff.z * -sin(realTurrRot * DEGTORAD)) + ship->turret->body.position.x);
 		ship->gun->body.position.z = ((ship->gunOff.z * cos(realTurrRot * DEGTORAD)) + ship->turret->body.position.z);
 	}
 	else
 	{
-		ship->turret->body.position.x = ((ship->turrOff.z * -sin(0 * DEGTORAD)) + ship->hull->body.position.x);
-		ship->turret->body.position.z = ((ship->turrOff.z * cos(0 * DEGTORAD)) + ship->hull->body.position.z);
+		if(ship->rot > 360)
+		{
+			ship->rot -= 360;
+		}
+		if(ship->rot < 0)
+		{
+			ship->rot += 360;
+		}
+		
+		ship->turret->body.position.x = ((ship->turrOff.z * -sin(ship->rot * DEGTORAD)) + ship->hull->body.position.x);
+		ship->turret->body.position.z = ((ship->turrOff.z * cos(ship->rot * DEGTORAD)) + ship->hull->body.position.z);
 
-		ship->gun->body.position.x = ((ship->gunOff.z * -sin(0 * DEGTORAD)) + ship->turret->body.position.x);
-		ship->gun->body.position.z = ((ship->gunOff.z * cos(0 * DEGTORAD)) + ship->turret->body.position.z);
+		ship->gun->body.position.x = ((ship->gunOff.z * -sin(ship->rot * DEGTORAD)) + ship->turret->body.position.x);
+		ship->gun->body.position.z = ((ship->gunOff.z * cos(ship->rot * DEGTORAD)) + ship->turret->body.position.z);
 	}
 }
 
@@ -153,26 +198,26 @@ void updateAllShipComp()
 void takeShipInput(Ship *ship)
 {
 	float realTurretRot;
-	
-	ship->vel.x = (shipVel * -sin(shipRot * DEGTORAD));
-	ship->vel.z = (shipVel * cos(shipRot * DEGTORAD));
+
+	ship->vel.x = (shipVel * -sin(ship->rot * DEGTORAD));
+	ship->vel.z = (shipVel * cos(ship->rot * DEGTORAD));
 
 	//ROTATE THE SHIP
-	ship->hull->rotation.y = -shipRot;
+	ship->hull->rotation.y = (ship->rot * -1);
 	if(ship->hull->rotation.y < 0){ship->hull->rotation.y += 360;}
 	if(ship->hull->rotation.y >= 360){ship->hull->rotation.y -= 360;}
 	
 	//SET TURRET ROTATION
 	if(turretRot < 0){realTurretRot = turretRot + 360;}
 	else {realTurretRot = turretRot;}
-	realTurretRot += shipRot;
+	realTurretRot += ship->rot;
 	if (realTurretRot >= 360){realTurretRot -= 360;}
 	realTurretRot *= -1;
 
 	ship->turret->rotation.y = realTurretRot;
 	ship->gun->rotation.y = realTurretRot;
  
-	//SET GUN ELEVATION ...So apparently I need something called Oiler's formula :P
+	//SET GUN ELEVATION ...So apparently I need something called Euler's formula :P
 	ship->gun->rotation.x = (-gunElev * cos(-ship->turret->rotation.y * DEGTORAD));
 	//ship->gun->rotation.z = (-gunElev * sin(-ship->turret->rotation.y * DEGTORAD));
 	
@@ -186,6 +231,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	ship->inuse = 1;
 	ship->shipType = shipType;
 	ship->shipID = numShips;
+	ship->rot = 0;
 	numShips++;
 
 	ship->acc = vec3d(0,0,0);

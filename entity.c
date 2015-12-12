@@ -114,13 +114,13 @@ void applyGrav()
         if (__entity_list[i].inuse && __entity_list[i].uid == -1)
         {
 			bullet = &__entity_list[i];
-			bullet->body.velocity.y -= 0.005;
+			//bullet->body.velocity.y -= 0.005;
 			if(bullet->body.position.y < -5){entity_free(bullet);}
         }
 		if (__entity_list[i].inuse && __entity_list[i].uid == -2)
         {
 			bullet = &__entity_list[i];
-			bullet->body.velocity.y -= 0.0005;
+			//bullet->body.velocity.y -= 0.0005;
 			if(bullet->body.position.y < -10){entity_free(bullet);}
         }
 	}

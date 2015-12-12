@@ -14,7 +14,7 @@ typedef struct Ship_S
 	//Vec3D pos;  not sure if we need this
 	Vec3D vel;
     Vec3D acc;
-    //Vec3D rot; not sure if we need this either
+    float rot;
 
 	Vec3D turrOff;
 	Vec3D gunOff;
@@ -88,5 +88,13 @@ void takeShipInput(Ship *ship);
  * @param shipType The type of ship to spawn 
  */
 Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType);
+
+/**
+ * @brief search ship list for next ship in use
+ * @param start Point to start searching in ship list 
+ */
+int scanForNext(int start);
+
+Ship *returnShip(int id);
 
 #endif
