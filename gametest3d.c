@@ -173,8 +173,32 @@ int main(int argc, char *argv[])
 					startLevel(space, 3);
 				}
 
-				if (editormode == 0)
+				else if (editormode == 0)
 				{
+					if (e.key.keysym.sym == SDLK_LEFT)
+					{
+						cameraRotation.y -= 1;
+					}
+					else if (e.key.keysym.sym == SDLK_RIGHT)
+					{
+						cameraRotation.y += 1;
+					}
+					else if (e.key.keysym.sym == SDLK_UP)
+					{
+						cameraRotation.x += 1;
+					}
+					else if (e.key.keysym.sym == SDLK_DOWN)
+					{
+						cameraRotation.x -= 1;
+					}
+					else if (e.key.keysym.sym == SDLK_p)
+					{
+						if(specMode == 0){specMode = 1;}
+						else {specMode = 0;}
+					}
+
+					else if (specMode)	
+					{
 						if (e.key.keysym.sym == SDLK_SPACE)
 						{
 							cameraPosition.z++;
@@ -227,75 +251,55 @@ int main(int argc, char *argv[])
 									0
 								));
 						}
-						else if (e.key.keysym.sym == SDLK_LEFT)
-						{
-							cameraRotation.y -= 1;
-						}
-						else if (e.key.keysym.sym == SDLK_RIGHT)
-						{
-							cameraRotation.y += 1;
-						}
-						else if (e.key.keysym.sym == SDLK_UP)
-						{
-							cameraRotation.x += 1;
-						}
-						else if (e.key.keysym.sym == SDLK_DOWN)
-						{
-							cameraRotation.x -= 1;
-						}
-				
+					}
 
-				
-						else if (e.key.keysym.sym == SDLK_y && shipVel < 0.4)
+					else if(!specMode)
+					{
+						if (e.key.keysym.sym == SDLK_w && shipVel < 0.4)
 						{
 							shipVel += 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_h && shipVel > 0.05)
+						else if (e.key.keysym.sym == SDLK_s && shipVel > 0.05)
 						{
 							shipVel -= 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_j)
+						else if (e.key.keysym.sym == SDLK_d)
 						{
 							shipRot += 0.5;
 							if(shipRot >= 360){shipRot -= 360;}
 							playerShip->rot = shipRot;
 						}
-						else if (e.key.keysym.sym == SDLK_g)
+						else if (e.key.keysym.sym == SDLK_a)
 						{
 							shipRot -= 0.5;
 							if(shipRot < 0){shipRot += 360;}
 							playerShip->rot = shipRot;
 						}
-						else if (e.key.keysym.sym == SDLK_m && turretRot < 135)
+						else if (e.key.keysym.sym == SDLK_c && turretRot < 135)
 						{
 							turretRot += 1;
 						}
-						else if (e.key.keysym.sym == SDLK_b && turretRot > -135)
+						else if (e.key.keysym.sym == SDLK_z && turretRot > -135)
 						{
 							turretRot -= 1;
 						}
-						else if (e.key.keysym.sym == SDLK_o && gunElev < 50)
+						else if (e.key.keysym.sym == SDLK_k && gunElev < 50)
 						{
 							gunElev += 0.5;
 						}
-						else if (e.key.keysym.sym == SDLK_l && gunElev > -5)
+						else if (e.key.keysym.sym == SDLK_m && gunElev > -5)
 						{
 							gunElev -= 0.5;
 						}
-						else if (e.key.keysym.sym == SDLK_q)
-						{
-							if(specMode == 0){specMode = 1;}
-							else {specMode = 0;}
-						}
-						else if (e.key.keysym.sym == SDLK_p)
+						else if (e.key.keysym.sym == SDLK_SPACE)
 						{
 							fireBullet(space, playerShip->gun->body.position, realTurrRot, gunElev, 0.5, -1);
 						}
-						else if (e.key.keysym.sym == SDLK_x)
+						else if (e.key.keysym.sym == SDLK_b)
 						{
 							fireBullet(space, playerShip->hull->body.position, shipRot, 0, 0, -2);
 						}
-
+					}
 				}
 
 				else if (editormode > 0)
@@ -309,7 +313,7 @@ int main(int argc, char *argv[])
 						editormode = 2;
 					}
 
-					if (editormode == 1)
+					else if (editormode == 1)
 					{
 						cameraPosition.x = selectedShip->hull->body.position.x;
 						cameraPosition.z = (selectedShip->hull->body.position.z - 70);
@@ -338,19 +342,19 @@ int main(int argc, char *argv[])
 						}
 						else if (e.key.keysym.sym == SDLK_d)
 						{
-							selectedShip->hull->body.position.x += 1;
+							selectedShip->hull->body.position.x -= 1;
 						}
 						else if (e.key.keysym.sym == SDLK_a)
 						{
-							selectedShip->hull->body.position.x -= 1;
+							selectedShip->hull->body.position.x += 1;
 						}
 						else if (e.key.keysym.sym == SDLK_RIGHT)
 						{
-							selectedShip->rot -= 1;
+							selectedShip->rot += 1;
 						}
 						else if (e.key.keysym.sym == SDLK_LEFT)
 						{
-							selectedShip->rot += 1;
+							selectedShip->rot -= 1;
 						}
 					}
 					else if (editormode == 2)
