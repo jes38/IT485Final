@@ -9,7 +9,6 @@ void startLevel(Space *space, int levNum)
 {
 	FILE *fileptr;
 	char buf[255];
-	int idx = 0;
 
 	int type = 0;
 	float x = 0;
@@ -18,18 +17,24 @@ void startLevel(Space *space, int levNum)
 	float rot = 0;
 
 	char *filepath = NULL;
-	if(levNum == 1){filepath = "1";}
-	else if(levNum == 2){filepath = "2";}
-	else if(levNum == 3){filepath = "3";}
-	else if(levNum == 4){filepath = "4";}
-	else if(levNum == 5){filepath = "5";}
-	else if(levNum == 6){filepath = "6";}
-	else if(levNum == 7){filepath = "7";}
-	else if(levNum == 8){filepath = "8";}
-	else if(levNum == 9){filepath = "9";}
+	if(levNum == 1){filepath = "levels/1.txt";}
+	else if(levNum == 2){filepath = "levels/2.txt";}
+	else if(levNum == 3){filepath = "levels/3.txt";}
+	else if(levNum == 4){filepath = "levels/4.txt";}
+	else if(levNum == 5){filepath = "levels/5.txt";}
+	else if(levNum == 6){filepath = "levels/6.txt";}
+	else if(levNum == 7){filepath = "levels/7.txt";}
+	else if(levNum == 8){filepath = "levels/8.txt";}
+	else if(levNum == 9){filepath = "levels/9.txt";}
 
 	fileptr = fopen(filepath,"r");
-	
+
+	if (!fileptr)
+    {
+        fprintf(stderr,"unable to open file: %s\n",filepath);
+		return;
+    }
+
 	freeAllShips(0);
 
 	while (fscanf(fileptr,"%s",buf) != EOF)

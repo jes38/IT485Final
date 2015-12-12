@@ -89,16 +89,8 @@ int main(int argc, char *argv[])
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
     
-    //cube1 = newCube(vec3d(0,0,0),"Cubert");
-    //cube2 = newCube(vec3d(10,0,0),"Hobbes");
-    
-    //cube1->body.velocity.x = 0.1;
-    
     space = space_new();
     space_set_steps(space,100);
-    
-    space_add_body(space,&cube1->body);
-    space_add_body(space,&cube2->body);
 
 	//my variables
 	specMode = 0;
@@ -130,6 +122,11 @@ int main(int argc, char *argv[])
 			cameraPosition.y = (playerShip->hull->body.position.y + 5);
 			cameraPosition.z = playerShip->hull->body.position.z;
 		}
+		else if (editormode > 0)
+		{
+			cameraPosition.x = selectedShip->hull->body.position.x;
+			cameraPosition.z = (selectedShip->hull->body.position.z - 70);
+		}
 
         while ( SDL_PollEvent(&e) ) 
         {
@@ -147,8 +144,6 @@ int main(int argc, char *argv[])
 				{
 					editormode = 1;
 
-					freeAllShips(1);
-
 					playerShip->hull->body.position.x = 0;
 					playerShip->hull->body.position.z = 0;
 					cameraPosition.x = playerShip->hull->body.position.x;
@@ -157,46 +152,77 @@ int main(int argc, char *argv[])
 					cameraRotation.x = 150;
 					cameraRotation.y = 0;
 					cameraRotation.z = 180;
+
+					freeAllShips(1);
 				}
 				else if (e.key.keysym.sym == SDLK_0 && editormode > 0)
 				{
 					editormode = 0;
+					editorselection = 0;
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_1)
 				{
 					startLevel(space, 1);
+					levelselected = 1;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_2)
 				{
 					startLevel(space, 2);
+					levelselected = 2;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_3)
 				{
 					startLevel(space, 3);
+					levelselected = 3;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_4)
 				{
 					startLevel(space, 4);
+					levelselected = 4;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_5)
 				{
 					startLevel(space, 5);
+					levelselected = 5;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_6)
 				{
 					startLevel(space, 6);
+					levelselected = 6;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_7)
 				{
 					startLevel(space, 7);
+					levelselected = 7;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_8)
 				{
 					startLevel(space, 8);
+					levelselected = 8;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				else if (e.key.keysym.sym == SDLK_9)
 				{
 					startLevel(space, 9);
+					levelselected = 9;
+					playerShip = returnShip(0);
+					selectedShip = playerShip;
 				}
 				
 
@@ -331,9 +357,6 @@ int main(int argc, char *argv[])
 
 				else if (editormode > 0)
 				{
-					cameraPosition.x = selectedShip->hull->body.position.x;
-					cameraPosition.z = (selectedShip->hull->body.position.z - 70);
-
 						if (e.key.keysym.sym == SDLK_p) //p for place
 						{
 							Ship *newShip = spawnShip(space, vec3d((selectedShip->hull->body.position.x + 10), 0, (selectedShip->hull->body.position.z + 10)), 1, 0);
@@ -394,17 +417,6 @@ int main(int argc, char *argv[])
             cameraRotation);
         
         entity_draw_all();
-		//updateAllShipModels();
-		/*
-        obj_draw(
-            bgobj,
-            vec3d(0,0,2),
-            vec3d(90,90,0),
-            vec3d(5,5,5),
-            vec4d(1,1,1,1),
-            bgtext
-        );
-        */
 
         if (r > 360)r -= 360;
         glPopMatrix();
