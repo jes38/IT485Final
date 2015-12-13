@@ -37,24 +37,6 @@
 
 void set_camera(Vec3D position, Vec3D rotation);
 
-Entity *newCube(Vec3D position,const char *name)
-{
-    Entity * ent;
-    ent = entity_new();
-    if (!ent)
-    {
-        return NULL;
-    }
-    ent->objModel = obj_load("models/cube.obj");
-    ent->texture = LoadSprite("models/cube_text.png",1024,1024);
-    vec3d_cpy(ent->body.position,position);
-    cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
-    sprintf(ent->name,"%s",name);
-    mgl_callback_set(&ent->body.touch,touch_callback,ent);
-	ent->body.id = -3;
-    return ent;
-}
-
 int main(int argc, char *argv[])
 {
     int i;
@@ -85,6 +67,7 @@ int main(int argc, char *argv[])
     obj_init();
     entity_init(255);
 	initShips();
+	TTF_init(20);
     
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
@@ -100,7 +83,7 @@ int main(int argc, char *argv[])
 	turretRot = 0;
 	gunElev = 0;
 	realTurrRot = 0;
-	editormode = 0; //0=editorOff 1=selection 2=place
+	editormode = 0; //0=editorOff 1=selection
 	editorselection = 0;
 	levelselected = 0;
 
@@ -420,7 +403,10 @@ int main(int argc, char *argv[])
 
         if (r > 360)r -= 360;
         glPopMatrix();
+
+		//renderHUD();
         /* drawing code above here! */
+
         graphics3d_next_frame();
     } 
     return 0;

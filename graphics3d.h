@@ -22,6 +22,7 @@
  *    SOFTWARE.
  */
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <GL/glew.h>
 
 #define EPSILON   1e-6f
@@ -60,5 +61,10 @@ void graphics3d_frame_begin();
  * @brief advance the frame, taking into account desired frame rate
  */
 void graphics3d_next_frame();
+
+void TTF_init(int size);
+void TTF_close();
+void renderHUD();
+void drawUI();
 
 #endif

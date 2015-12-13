@@ -4,6 +4,8 @@
 #include <GL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
@@ -18,6 +20,11 @@ GLuint graphics3d_get_shader_program()
 }
 
 void graphics3d_setup_default_light();
+
+SDL_Surface *message;
+SDL_Surface *screen;
+TTF_Font *font;
+SDL_Color textColor;
 
 int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 frameDelay)
 {
@@ -179,5 +186,123 @@ void graphics3d_setup_default_light()
     
 }
 
+void TTF_init(int size)
+{
+	font = NULL;
+	message = NULL;
+	screen = NULL;
+	textColor.b = 255;
+	textColor.g = 255;
+	textColor.r = 255;
+
+	TTF_Init();
+
+	font = TTF_OpenFont( "SigmarOne.ttf", size);
+	if (font == NULL)
+	{
+		printf("font did not load!\n");
+	}
+
+	atexit(TTF_close);
+}
+
+void TTF_close()
+{
+	TTF_CloseFont(font);
+	TTF_Quit();
+}
+
+void renderHUD()
+{
+	GLuint texture;
+
+	if (font == NULL)
+	{
+		printf("font did not load!\n");
+		return;
+	}
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	
+	gluOrtho2D(0, 1024, 0, 768);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	drawUI();
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glDeleteTextures(1, &texture);
+	if(message != NULL)
+	{
+		SDL_FreeSurface(message);
+		message = NULL;
+	}
+	if(screen != NULL)
+	{
+		SDL_FreeSurface(screen);
+		screen = NULL;
+	}
+}
+
+void drawUI()
+{
+	int i;
+	int x = 0;
+	int y = 0;
+
+	for (i = 0; i < 3; i++)
+	{
+		if(message != NULL)
+		{
+			SDL_FreeSurface(message);
+		}
+		if(i = 0){message = TTF_RenderText_Blended(font, "Test String 1!", textColor);}
+		else if(i = 1){message = TTF_RenderText_Blended(font, "Test String 2!", textColor);}
+		else if(i = 2){message = TTF_RenderText_Blended(font, "Test String 3!", textColor);}
+		else{message = TTF_RenderText_Blended(font, "Test String!", textColor);}
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, message->w, message->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, screen->pixels);
+
+		glBegin(GL_QUADS);
+		{
+			glTexCoord2f(0,0);
+			glVertex2f(x, y);
+
+			glTexCoord2f(1,0);
+			glVertex2f(x + message->w, y);
+
+			glTexCoord2f(1,1);
+			glVertex2f(x + message->w, y + message->h);
+
+			glTexCoord2f(0,1);
+			glVertex2f(x, y + message->h);
+		}
+		glEnd();
+
+		y = (i * 30);
+	}
+}
 
 /*eol@eof*/
