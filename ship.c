@@ -77,6 +77,7 @@ void freeAllShips(int notPlayer)
 		{
 		    if (shipList[i].inuse){freeShip(&shipList[i]);}
 		}
+		numShips = 0;
 	}
 	else if(notPlayer == 1)
 	{
@@ -84,6 +85,7 @@ void freeAllShips(int notPlayer)
 		{
 			if (shipList[i].inuse && shipList[i].shipID != 0){freeShip(&shipList[i]);}
 		}
+		numShips = 1;
 	}
 }
 
@@ -128,8 +130,7 @@ void updateShipPos(Ship *ship)
 	else
 	{
 		ship->hull->rotation.y = (ship->rot * -1);
-		ship->turret->rotation.y = (ship->rot * -1); //temporary. this will change after I add AI
-		ship->gun->rotation.y = (ship->rot * -1); //temporary. this will change after I add AI
+		ship->turret->rotation.y = (ship->rot * -1);
 	}
 
 	vec3d_add(ship->vel,ship->vel,ship->acc);
@@ -165,8 +166,12 @@ void componentInherit(Ship *ship) //all the bodies that the ship is composed of 
 		ship->turret->body.position.x = ((ship->turrOff.z * -sin(ship->rot * DEGTORAD)) + ship->hull->body.position.x);
 		ship->turret->body.position.z = ((ship->turrOff.z * cos(ship->rot * DEGTORAD)) + ship->hull->body.position.z);
 
-		ship->gun->body.position.x = ((ship->gunOff.z * -sin(ship->rot * DEGTORAD)) + ship->turret->body.position.x);
-		ship->gun->body.position.z = ((ship->gunOff.z * cos(ship->rot * DEGTORAD)) + ship->turret->body.position.z);
+		enemyTarget(ship);
+
+		ship->gun->rotation.y = ship->turret->rotation.y;
+
+		ship->gun->body.position.x = ((ship->gunOff.z * -sin(-1 * ship->turret->rotation.y * DEGTORAD)) + ship->turret->body.position.x);
+		ship->gun->body.position.z = ((ship->gunOff.z * cos(-1 * ship->turret->rotation.y * DEGTORAD)) + ship->turret->body.position.z);
 	}
 }
 
@@ -216,6 +221,8 @@ void takeShipInput(Ship *ship)
 
 	ship->turret->rotation.y = realTurretRot;
 	ship->gun->rotation.y = realTurretRot;
+
+	//slog("rotation: %f", ship->turret->rotation.y);
  
 	//SET GUN ELEVATION ...So apparently I need something called Euler's formula :P
 	ship->gun->rotation.x = (-gunElev * cos(-ship->turret->rotation.y * DEGTORAD));
@@ -346,16 +353,15 @@ void saveLevel(int levNum)
 	int i;
 	FILE *fileptr;
 	
-	char *filepath = NULL;
-	if(levNum == 1){filepath = "levels/1.txt";}
-	else if(levNum == 2){filepath = "levels/2.txt";}
-	else if(levNum == 3){filepath = "levels/3.txt";}
-	else if(levNum == 4){filepath = "levels/4.txt";}
-	else if(levNum == 5){filepath = "levels/5.txt";}
-	else if(levNum == 6){filepath = "levels/6.txt";}
-	else if(levNum == 7){filepath = "levels/7.txt";}
-	else if(levNum == 8){filepath = "levels/8.txt";}
-	else if(levNum == 9){filepath = "levels/9.txt";}
+	char filepath[512];
+	if(levNum >= 1 && levNum <= 9)
+	{
+		sprintf(filepath,"levels/%d.txt", levNum);
+	}
+	else
+	{
+		sprintf(filepath,"Filepath error");
+	}
 
     fileptr = fopen(filepath,"w");
 
@@ -374,4 +380,28 @@ void saveLevel(int levNum)
     }
 
     fclose(fileptr);
+}
+
+void enemyTarget(Ship *ship)
+{
+	float x, z, xdist, zdist, angle;
+	Ship *player = returnShip(0);
+	
+	x = ship->hull->body.position.x;
+	z = ship->hull->body.position.z;
+	xdist = (player->hull->body.position.x - x);
+	zdist = (player->hull->body.position.z - z);
+	if (zdist < 0)
+	{
+		zdist *= -1;
+		xdist *= -1;
+		angle = (atan(xdist/zdist) * RADTODEG);
+		ship->turret->rotation.y += (angle + ship->rot - 180);
+	}
+	else
+	{
+		angle = (atan(xdist/zdist) * RADTODEG);
+		ship->turret->rotation.y += (angle + ship->rot);
+	}
+	//slog("angle: %f",ship->turret->rotation.y); 
 }

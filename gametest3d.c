@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     obj_init();
     entity_init(255);
 	initShips();
-	TTF_init(20);
+	//TTF_init(20);
     
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
@@ -127,16 +127,14 @@ int main(int argc, char *argv[])
 				{
 					editormode = 1;
 
-					playerShip->hull->body.position.x = 0;
-					playerShip->hull->body.position.z = 0;
-					cameraPosition.x = playerShip->hull->body.position.x;
-					cameraPosition.y = (playerShip->hull->body.position.y + 50);
-					cameraPosition.z = (playerShip->hull->body.position.z - 70);
+					cameraPosition.x = 0;
+					cameraPosition.y = 50;
+					cameraPosition.z = -70;
 					cameraRotation.x = 150;
 					cameraRotation.y = 0;
 					cameraRotation.z = 180;
 
-					freeAllShips(1);
+					startLevel(space, levelselected);
 				}
 				else if (e.key.keysym.sym == SDLK_0 && editormode > 0)
 				{
@@ -400,11 +398,11 @@ int main(int argc, char *argv[])
             cameraRotation);
         
         entity_draw_all();
-
         if (r > 360)r -= 360;
-        glPopMatrix();
 
-		//renderHUD();
+		renderHUD();
+
+        glPopMatrix();
         /* drawing code above here! */
 
         graphics3d_next_frame();

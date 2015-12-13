@@ -99,4 +99,6 @@ Ship *returnShip(int id);
 
 void saveLevel(int levNum);
 
+void enemyTarget(Ship *ship);
+
 #endif
