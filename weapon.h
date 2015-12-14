@@ -13,6 +13,11 @@
  * @param bullVel The velocity of the bullet
  * @param id The type of bullet (1 = cannon, 2 = depth charge)
  */
+
+int AIcounter;
+
 void fireBullet(Space *space, Vec3D spawn, float angle, float elev, float bullVel, int id);
+void AIfire(Ship *ship);
+void fireAIBullet(Space *space, Vec3D spawn, float angle, float elev, float bullVel, int id);
 
 #endif

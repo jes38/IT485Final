@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 	int editormode;
 	int editorselection;
 	int levelselected;
+	int turning;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -74,6 +75,7 @@ int main(int argc, char *argv[])
     
     space = space_new();
     space_set_steps(space,100);
+	gameSpace = space;
 
 	//my variables
 	specMode = 0;
@@ -86,6 +88,8 @@ int main(int argc, char *argv[])
 	editormode = 0; //0=editorOff 1=selection
 	editorselection = 0;
 	levelselected = 0;
+	AIcounter = 0;
+	turning = 0;
 
 	playerShip = spawnShip(space, vec3d(0,0,0), 1, 0);
 	selectedShip = playerShip;
@@ -99,16 +103,30 @@ int main(int argc, char *argv[])
         }
 		updateAllShipComp();
 		applyGrav();
+
+		if(AIcounter == 101)
+		{
+			AIcounter = 0;
+		}
+		AIcounter++;
+
 		if(specMode == 0 && editormode == 0)
 		{
 			cameraPosition.x = playerShip->hull->body.position.x;
 			cameraPosition.y = (playerShip->hull->body.position.y + 5);
 			cameraPosition.z = playerShip->hull->body.position.z;
 		}
-		else if (editormode > 0)
+		else if (editormode > 0 && selectedShip->shipType != 4)
 		{
 			cameraPosition.x = selectedShip->hull->body.position.x;
+			cameraPosition.y = 50;
 			cameraPosition.z = (selectedShip->hull->body.position.z - 70);
+		}
+		else if (editormode > 0 && selectedShip->shipType == 4)
+		{
+			cameraPosition.x = selectedShip->hull->body.position.x;
+			cameraPosition.y = 80;
+			cameraPosition.z = (selectedShip->hull->body.position.z - 120);
 		}
 
         while ( SDL_PollEvent(&e) ) 
@@ -293,21 +311,23 @@ int main(int argc, char *argv[])
 						{
 							shipVel += 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_s && shipVel > 0.05)
+						else if (e.key.keysym.sym == SDLK_s && shipVel > -0.05)
 						{
 							shipVel -= 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_d)
+						else if (e.key.keysym.sym == SDLK_d && turning < 1)
 						{
-							shipRot += 0.5;
-							if(shipRot >= 360){shipRot -= 360;}
-							playerShip->rot = shipRot;
+							turning += 1;
+							//shipRot += 0.5;
+							//if(shipRot >= 360){shipRot -= 360;}
+							//playerShip->rot = shipRot;
 						}
-						else if (e.key.keysym.sym == SDLK_a)
+						else if (e.key.keysym.sym == SDLK_a && turning > -1)
 						{
-							shipRot -= 0.5;
-							if(shipRot < 0){shipRot += 360;}
-							playerShip->rot = shipRot;
+							turning -= 1;
+							//shipRot -= 0.5;
+							//if(shipRot < 0){shipRot += 360;}
+							//playerShip->rot = shipRot;
 						}
 						else if (e.key.keysym.sym == SDLK_c && turretRot < 135)
 						{
@@ -338,9 +358,21 @@ int main(int argc, char *argv[])
 
 				else if (editormode > 0)
 				{
-						if (e.key.keysym.sym == SDLK_p) //p for place
+						if (e.key.keysym.sym == SDLK_p)
 						{
 							Ship *newShip = spawnShip(space, vec3d((selectedShip->hull->body.position.x + 10), 0, (selectedShip->hull->body.position.z + 10)), 1, 0);
+							selectedShip = newShip;
+							editorselection = selectedShip->shipID;
+						}
+						if (e.key.keysym.sym == SDLK_o)
+						{
+							Ship *newShip = spawnShip(space, vec3d((selectedShip->hull->body.position.x + 10), 0, (selectedShip->hull->body.position.z + 10)), 3, 0);
+							selectedShip = newShip;
+							editorselection = selectedShip->shipID;
+						}
+						if (e.key.keysym.sym == SDLK_i)
+						{
+							Ship *newShip = spawnIsland(space, vec3d((selectedShip->hull->body.position.x + 100), 0, (selectedShip->hull->body.position.z + 100)));
 							selectedShip = newShip;
 							editorselection = selectedShip->shipID;
 						}
@@ -356,7 +388,7 @@ int main(int argc, char *argv[])
 						}
 						else if (e.key.keysym.sym == SDLK_r && selectedShip->shipID != 0) //r for remove
 						{
-							freeShip(selectedShip);
+							freeShip(space, selectedShip);
 							
 							editorselection += 1;
 							editorselection = scanForNext(editorselection);
@@ -389,6 +421,19 @@ int main(int argc, char *argv[])
 				}
             }
         }
+
+		if(turning > 0)
+		{
+			shipRot += 0.07;
+			if(shipRot >= 360){shipRot -= 360;}
+			playerShip->rot = shipRot;
+		}
+		else if(turning < 0)
+		{
+			shipRot -= 0.07;
+			if(shipRot >= 360){shipRot -= 360;}
+			playerShip->rot = shipRot;
+		}
 		 
         graphics3d_frame_begin();
         

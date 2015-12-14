@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "entity.h"
+#include "space.h"
 #include "simple_logger.h"
 
 static Entity *__entity_list = NULL;
@@ -114,14 +115,41 @@ void applyGrav()
         if (__entity_list[i].inuse && __entity_list[i].uid == -1)
         {
 			bullet = &__entity_list[i];
+			bullet->health -= 1;
 			//bullet->body.velocity.y -= 0.005;
-			if(bullet->body.position.y < -5){entity_free(bullet);}
+			//if(bullet->body.position.y < -5){entity_free(bullet);}
+
+			if(bullet->health <= 0)
+			{
+				space_remove_body(gameSpace, &bullet->body);
+				entity_free(bullet);
+			}
         }
-		if (__entity_list[i].inuse && __entity_list[i].uid == -2)
+		else if (__entity_list[i].inuse && __entity_list[i].uid == -2)
         {
 			bullet = &__entity_list[i];
+			bullet->health -= 1;
 			//bullet->body.velocity.y -= 0.0005;
-			if(bullet->body.position.y < -10){entity_free(bullet);}
+			//if(bullet->body.position.y < -10){space_remove_body(gameSpace, &bullet->body); entity_free(bullet);}
+
+			if(bullet->health <= 0)
+			{
+				space_remove_body(gameSpace, &bullet->body);
+				entity_free(bullet);
+			}
+        }
+		else if (__entity_list[i].inuse && __entity_list[i].uid == -3)
+        {
+			bullet = &__entity_list[i];
+			bullet->health -= 1;
+			//bullet->body.velocity.y -= 0.0005;
+			//if(bullet->body.position.y < -5){space_remove_body(gameSpace, &bullet->body); entity_free(bullet);}
+
+			if(bullet->health <= 0)
+			{
+				space_remove_body(gameSpace, &bullet->body);
+				entity_free(bullet);
+			}
         }
 	}
 }

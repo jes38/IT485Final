@@ -24,6 +24,8 @@ typedef struct Ship_S
 	Entity *gun;
 }Ship;
 
+Ship *shipList;
+
 float shipVel;
 float shipRot;
 float turretRot;
@@ -45,13 +47,13 @@ void initShips();
  * @brief free a single ship
  * @param ship the ship to free
  */
-void freeShip(Ship *ship);
+void freeShip(Space *space, Ship *ship);
 
 /**
  * @brief remove all ships from the game
  * @param notPlayer should the function remove the player (0 = yes, 1 = no)
  */
-void freeAllShips(int notPlayer);
+void freeAllShips(Space *space, int notPlayer);
 
 /**
  * @brief Update ship velocity and the velocity of the hull ONLY
@@ -97,8 +99,8 @@ int scanForNext(int start);
 
 Ship *returnShip(int id);
 
-void saveLevel(int levNum);
-
 void enemyTarget(Ship *ship);
+
+Ship *spawnIsland(Space *space, Vec3D spawnPt);
 
 #endif

@@ -222,7 +222,7 @@ void renderHUD()
 
 	if (font == NULL)
 	{
-		printf("font did not load!\n");
+		//printf("font did not load!\n");
 		return;
 	}
 

@@ -10,5 +10,6 @@
  */
 
 void startLevel(Space *space, int levNum);
+void saveLevel(int levNum);
 
 #endif

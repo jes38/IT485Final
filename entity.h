@@ -10,6 +10,7 @@
 typedef struct Entity_S
 {
     int inuse;
+	int health;
     int uid;    /**<unique id of this entity*/
     char name[128];
     Vec3D acceleration;

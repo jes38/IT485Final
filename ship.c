@@ -8,14 +8,15 @@
 #include "collisions.h"
 #include "mgl_callback.h"
 #include "space.h"
+#include "weapon.h"
 
-Ship *shipList = NULL;
 int shipAcc = 0;
 static int shipsInitd = 0;
 
 void initShips()
 {
-    if (shipsInitd == 0)
+    shipList = NULL;
+	if (shipsInitd == 0)
 	{
 		shipList = (Ship *)malloc(sizeof(Ship)*maxShips);
 		memset(shipList,0,sizeof(Ship)*maxShips);
@@ -48,7 +49,7 @@ Ship *newShip()
 	return ship;
 }
 
-void freeShip(Ship *ship)
+void freeShip(Space *space, Ship *ship)
 {
 	if (!ship)
     {
@@ -56,6 +57,10 @@ void freeShip(Ship *ship)
         return;
     }
     ship->inuse = 0;
+
+	space_remove_body(space, &ship->hull->body);
+	space_remove_body(space, &ship->turret->body);
+	space_remove_body(space, &ship->gun->body);
 
 	entity_free(ship->hull);
 	entity_free(ship->turret);
@@ -66,7 +71,7 @@ void freeShip(Ship *ship)
 	ship->gun = NULL;
 }
 
-void freeAllShips(int notPlayer)
+void freeAllShips(Space *space, int notPlayer)
 {
 	int i;
 	if (!shipList)return;
@@ -75,7 +80,7 @@ void freeAllShips(int notPlayer)
 	{
 		for (i = 0;i < maxShips;i++)
 		{
-		    if (shipList[i].inuse){freeShip(&shipList[i]);}
+		    if (shipList[i].inuse){freeShip(space, &shipList[i]);}
 		}
 		numShips = 0;
 	}
@@ -83,7 +88,7 @@ void freeAllShips(int notPlayer)
 	{
 		for (i = 0;i < maxShips;i++)
 		{
-			if (shipList[i].inuse && shipList[i].shipID != 0){freeShip(&shipList[i]);}
+			if (shipList[i].inuse && shipList[i].shipID != 0){freeShip(space, &shipList[i]);}
 		}
 		numShips = 1;
 	}
@@ -113,6 +118,11 @@ Ship *returnShip(int id)
 			ship = &shipList[i];
 			return ship;
 		}
+		else if (shipList[i].inuse && shipList[i].shipID == (id * -1))
+        {
+			ship = &shipList[i];
+			return ship;
+		}
 	}
 
 	ship = &shipList[0];
@@ -127,8 +137,19 @@ void updateShipPos(Ship *ship)
 	{
 		takeShipInput(ship);
 	}
-	else
+	else if(ship->shipID > 0)
 	{
+		if(ship->hull->health <= 0)
+		{
+			freeShip(gameSpace, ship);
+			return;
+		}
+		else if(ship->turret->health <= 0)
+		{
+			freeShip(gameSpace, ship);
+			return;
+		}
+		
 		ship->hull->rotation.y = (ship->rot * -1);
 		ship->turret->rotation.y = (ship->rot * -1);
 	}
@@ -166,7 +187,10 @@ void componentInherit(Ship *ship) //all the bodies that the ship is composed of 
 		ship->turret->body.position.x = ((ship->turrOff.z * -sin(ship->rot * DEGTORAD)) + ship->hull->body.position.x);
 		ship->turret->body.position.z = ((ship->turrOff.z * cos(ship->rot * DEGTORAD)) + ship->hull->body.position.z);
 
-		enemyTarget(ship);
+		if(ship->shipID > 0)
+		{
+			enemyTarget(ship);
+		}
 
 		ship->gun->rotation.y = ship->turret->rotation.y;
 
@@ -183,7 +207,7 @@ void updateAllShipPos()
     {
         if (shipList[i].inuse)
         {
-            updateShipPos(&shipList[i]);
+			updateShipPos(&shipList[i]);
         }
     }
 }
@@ -239,6 +263,8 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType, float rotation)
 	ship->shipType = shipType;
 	ship->shipID = numShips;
 	ship->rot = rotation;
+	ship->hull->health = 5;
+	ship->turret->health = 2;
 	numShips++;
 
 	ship->acc = vec3d(0,0,0);
@@ -348,40 +374,6 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType, float rotation)
 	return ship;
 }
 
-void saveLevel(int levNum)
-{
-	int i;
-	FILE *fileptr;
-	
-	char filepath[512];
-	if(levNum >= 1 && levNum <= 9)
-	{
-		sprintf(filepath,"levels/%d.txt", levNum);
-	}
-	else
-	{
-		sprintf(filepath,"Filepath error");
-	}
-
-    fileptr = fopen(filepath,"w");
-
-	if (!fileptr)
-    {
-        fprintf(stderr,"unable to open file: %s\n",filepath);
-    }
-
-    for (i = 0;i < maxShips;i++)
-    {
-        if (shipList[i].inuse)
-        {
-            Ship *ship = &shipList[i];
-			fprintf(fileptr,"Ship: %i %f %f %f %f\n", ship->shipType, ship->hull->body.position.x, ship->hull->body.position.y, ship->hull->body.position.z, ship->rot);
-        }
-    }
-
-    fclose(fileptr);
-}
-
 void enemyTarget(Ship *ship)
 {
 	float x, z, xdist, zdist, angle;
@@ -403,5 +395,85 @@ void enemyTarget(Ship *ship)
 		angle = (atan(xdist/zdist) * RADTODEG);
 		ship->turret->rotation.y += (angle + ship->rot);
 	}
-	//slog("angle: %f",ship->turret->rotation.y); 
+	//slog("angle: %f",ship->turret->rotation.y);
+
+	if(AIcounter == 100)
+	{
+		float realDist = (zdist * zdist) + (xdist * xdist);
+		
+		if (realDist <= 2500) //50 * 50 = 2500
+		{
+			AIfire(ship);
+		}
+	}
+}
+
+Ship *spawnIsland(Space *space, Vec3D spawnPt)
+{
+	Ship *ship;
+	ship = newShip();
+
+	ship->inuse = 1;
+	ship->shipType = 4;
+	ship->shipID = (numShips *= -1);
+	ship->rot = 0;
+	ship->hull->health = 10000;
+	numShips++;
+
+	ship->acc = vec3d(0,0,0);
+	ship->vel = vec3d(0,0,0);
+
+
+	//Hull
+	ship->hull->objModel = obj_load("models/cube.obj");
+	ship->hull->texture = LoadSprite("models/cube_text.png",1024,1024);
+	vec3d_cpy(ship->hull->body.position,spawnPt);
+	
+	cube_set(ship->hull->body.bounds,-45,-1,-45,70,2,70);
+	ship->hull->scale = vec3d(45,1,45);
+	
+	mgl_callback_set(&ship->hull->body.touch,touch_callback,ship->hull);
+	ship->hull->body.id = ship->shipID;
+
+
+	//Turret
+	ship->turret->objModel = obj_load("models/cube.obj");
+	ship->turret->texture = LoadSprite("models/cube_text.png",1024,1024);
+	vec3d_cpy(ship->turret->body.position,spawnPt);
+
+	cube_set(ship->turret->body.bounds,-1,-1,-1.5,2,2,3);
+	ship->turret->scale = vec3d(1,1,1.5);
+	
+	mgl_callback_set(&ship->turret->body.touch,touch_callback,ship->turret);
+	ship->turret->body.id = ship->shipID;
+
+
+	//Gun
+	ship->gun->objModel = obj_load("models/cube.obj");
+	ship->gun->texture = LoadSprite("models/cube_text.png",1024,1024);
+	vec3d_cpy(ship->gun->body.position,spawnPt);
+	
+	cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
+	ship->gun->scale = vec3d(0.25,0.25,2);
+	
+	mgl_callback_set(&ship->gun->body.touch,touch_callback,ship->gun);
+	ship->gun->body.id = ship->shipID;
+
+
+	space_add_body(space,&ship->hull->body);
+	space_add_body(space,&ship->turret->body);
+	space_add_body(space,&ship->gun->body);
+
+	ship->hull->uid = ship->shipID;
+	ship->turret->uid = ship->shipID;
+	ship->gun->uid = ship->shipID;
+
+	ship->hull->body.position.y = -1;
+	
+	ship->turrOff = vec3d(0,-2.75,0);
+	ship->gunOff = vec3d(0,0,1.25);
+	ship->turret->body.position.y = -2.75;
+	ship->gun->body.position.y = -3;
+
+	return ship;
 }

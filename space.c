@@ -34,8 +34,10 @@ void touch_callback(void *data, void *context)
         slog("%s is touching",me->name);
 		slog("%s",other->name);
 
-		if(me->uid == -1 || me->uid == -2)
+		if(me->uid == -1 || me->uid == -2 || me->uid == -3)
 		{
+			other->health -= 1;
+			space_remove_body(gameSpace, &me->body);
 			entity_free(me);
 		}
     }
@@ -109,6 +111,8 @@ static void space_body_update(Space *space,Body *body)
 		else if(body->id == -1 && other->id == 0){continue;}
 		else if(body->id == 0 && other->id == -2){continue;}
 		else if(body->id == -2 && other->id == 0){continue;}
+		else if(body->id > 0 && other->id == -3){continue;}
+		else if(body->id == -3 && other->id > 0){continue;}
 
         if (cube_cube_intersection(a,b))
         {
