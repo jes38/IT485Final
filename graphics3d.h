@@ -24,6 +24,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <GL/glew.h>
+#include "ship.h"
 
 #define EPSILON   1e-6f
 
@@ -62,9 +63,16 @@ void graphics3d_frame_begin();
  */
 void graphics3d_next_frame();
 
-void TTF_init(int size);
-void TTF_close();
-void renderHUD();
-void drawUI();
+
+////////////
+//UI STUFF//
+////////////
+void initTextSprites();
+void DrawUI();
+void drawBoxes(int i);
+void drawNums(int i, char num1, char num2, char num3, char num4);
+float charCheck(char num);
+void hudReset();
+void HUDupdate(Ship *player, Ship *selected);
 
 #endif

@@ -32,6 +32,8 @@ float turretRot;
 float gunElev;
 int numShips; //does not include player
 float realTurrRot;
+float targDst;
+float enVec;
 
 /**
  * @brief add a ship to the ship list

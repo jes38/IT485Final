@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     obj_init();
     entity_init(255);
 	initShips();
-	//TTF_init(20);
+	initTextSprites();
     
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
@@ -90,6 +90,8 @@ int main(int argc, char *argv[])
 	levelselected = 0;
 	AIcounter = 0;
 	turning = 0;
+	targDst = 0;
+	enVec = 0;
 
 	playerShip = spawnShip(space, vec3d(0,0,0), 1, 0);
 	selectedShip = playerShip;
@@ -103,6 +105,7 @@ int main(int argc, char *argv[])
         }
 		updateAllShipComp();
 		applyGrav();
+		HUDupdate(playerShip, selectedShip);
 
 		if(AIcounter == 101)
 		{
@@ -318,16 +321,10 @@ int main(int argc, char *argv[])
 						else if (e.key.keysym.sym == SDLK_d && turning < 1)
 						{
 							turning += 1;
-							//shipRot += 0.5;
-							//if(shipRot >= 360){shipRot -= 360;}
-							//playerShip->rot = shipRot;
 						}
 						else if (e.key.keysym.sym == SDLK_a && turning > -1)
 						{
 							turning -= 1;
-							//shipRot -= 0.5;
-							//if(shipRot < 0){shipRot += 360;}
-							//playerShip->rot = shipRot;
 						}
 						else if (e.key.keysym.sym == SDLK_c && turretRot < 135)
 						{
@@ -445,7 +442,7 @@ int main(int argc, char *argv[])
         entity_draw_all();
         if (r > 360)r -= 360;
 
-		renderHUD();
+		DrawUI();
 
         glPopMatrix();
         /* drawing code above here! */

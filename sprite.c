@@ -3,6 +3,8 @@
 #include "graphics3d.h"
 
 #include <SDL_image.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MaxSprites    1024
 

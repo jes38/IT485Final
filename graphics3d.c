@@ -1,11 +1,14 @@
 #include "graphics3d.h"
 #include "simple_logger.h"
 #include "shader.h"
+#include "sprite.h"
+#include "vector.h"
+#include "ship.h"
 #include <GL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL.h>
-#include <SDL_ttf.h>
+#include <math.h>
 
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
@@ -21,10 +24,12 @@ GLuint graphics3d_get_shader_program()
 
 void graphics3d_setup_default_light();
 
-SDL_Surface *message;
-SDL_Surface *screen;
-SDL_Color textColor;
-TTF_Font *font = NULL;
+Sprite *numbers;
+Sprite *enemyVec;
+Sprite *elev;
+Sprite *targDist;
+Sprite *turrRot;
+Sprite *negative;
 
 int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 frameDelay)
 {
@@ -186,121 +191,294 @@ void graphics3d_setup_default_light()
     
 }
 
-void TTF_init(int size)
+//////////////////////////
+//UI GRAPHICS BELOW HERE//
+//////////////////////////
+void DrawUI()
 {
-	font = NULL;
-	message = NULL;
-	screen = NULL;
-	textColor.b = 255;
-	textColor.g = 255;
-	textColor.r = 255;
-
-	TTF_Init();
-	if (TTF_Init())
+	int i;
+	int o;
+	char numString[25];
+	char num1;
+	char num2;
+	char num3;
+	char num4;
+	for(i = 0;i < 8;i++)
 	{
-		slog("TTF failed to load: %s\n", TTF_GetError());
-	}
+		glMatrixMode(GL_PROJECTION);
 
-	font = TTF_OpenFont( "SigmarOne.ttf", size);
-	if (font == NULL)
-	{
-		printf("font did not load!\n");
-	}
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0.0, 1024, 0.0, 768, -1.0, 1.0);
+		glMatrixMode(GL_MODELVIEW);
 
-	atexit(TTF_close);
+		glPushMatrix();
+		glLoadIdentity();
+		glDisable(GL_LIGHTING);
+
+		glColor3f(1,1,1);
+		glEnable(GL_TEXTURE_2D);
+	
+		if(i < 4)
+		{
+			drawBoxes(i);
+		}
+		else
+		{
+			if(i == 4){sprintf(numString, "%f", turretRot);}
+			else if(i == 5){sprintf(numString, "%f", targDst);}
+			else if(i == 6){sprintf(numString, "%f", gunElev);}
+			else if(i == 7){sprintf(numString, "%f", enVec);}
+
+			for(o = 0;o < 4;o++)
+			{
+				if(o==0)
+				{
+					num1 = numString[o];
+					//num1 = '-';
+				}
+				else if(o==1)
+				{
+					num2 = '.';
+					num2 = numString[o];
+					//num2 = '2';
+					if(num2 == '.')
+					{
+						drawNums((i - 4), num1, NULL, NULL, NULL);
+						o = 5;
+					}
+				}
+				else if(o==2)
+				{
+					num3 = '.';
+					num3 = numString[o];
+					//num3 = '3';
+					if(num3 == '.')
+					{
+						drawNums((i - 4), num1, num2, NULL, NULL);
+						o = 5;
+					}
+				}
+				else if(o==3)
+				{
+					num4 = '.';
+					num4 = numString[o];
+					//num4 = '4';
+					if(num4 == '.')
+					{
+						drawNums((i - 4), num1, num2, num3, NULL);
+						o = 5;
+					}
+					else
+					{
+						drawNums((i - 4), num1, num2, num3, num4);
+					}
+				}
+			}
+		}
+
+		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+
+		glMatrixMode(GL_MODELVIEW);
+	}
 }
 
-void TTF_close()
-{
-	TTF_CloseFont(font);
-	TTF_Quit();
-}
-
-void renderHUD()
+void drawBoxes(int i)
 {
 	GLuint texture;
 
-	if (font == NULL)
-	{
-		//printf("font did not load!\n");
-		return;
-	}
+	float xsize = 500;
+	float ysize = 50;
+	float x = 0;
+	float y = 750;
+	
+	if(i == 0){texture = turrRot->texture;}
+	else if(i == 1){texture = targDist->texture;}
+	else if(i == 2){texture = elev->texture;}
+	else if(i == 3){texture = enemyVec->texture;}
 
-	//gluOrtho2D(-1, 1, -1, 1);
-	gluOrtho2D(0, 1024, 0, 786);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	y -= (ysize * i);
+	glTranslatef(x, y, 0);
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f(1, 0); 
+		glVertex3f(xsize, 0, 0);
+
+		glTexCoord2f(1, 1); 
+		glVertex3f(xsize, -ysize, 0);
+
+		glTexCoord2f(0, 1); 
+		glVertex3f(0, -ysize, 0);
+	glEnd();
+}
+
+void drawNums(int i, char num1, char num2, char num3, char num4)
+{
+	float number;
+	float xsize = 18;
+	float ysize = 37.5;
+	float x = 202;
+	float y = 744;
+
+	glBindTexture(GL_TEXTURE_2D, numbers->texture);
+	y -= (50 * i);
+	glTranslatef(x, y, 0);
+
+	number = charCheck(num1);
+	if(number == -1){number = 10;}
+	glBegin(GL_QUADS);
+		glTexCoord2f(number/11, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 0); 
+		glVertex3f(xsize, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 1); 
+		glVertex3f(xsize, -ysize, 0);
+
+		glTexCoord2f(number/11, 1); 
+		glVertex3f(0, -ysize, 0);
+	glEnd();
+
+	if(num2 != NULL){number = charCheck(num2);}
+	else{return;}
+	hudReset();
+	glBindTexture(GL_TEXTURE_2D, numbers->texture);
+	x += 15;
+	glTranslatef(x, y, 0);
+	glBegin(GL_QUADS);
+		glTexCoord2f(number/11, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 0); 
+		glVertex3f(xsize, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 1); 
+		glVertex3f(xsize, -ysize, 0);
+
+		glTexCoord2f(number/11, 1); 
+		glVertex3f(0, -ysize, 0);
+	glEnd();
+
+	if(num3 != NULL){number = charCheck(num3);}
+	else{return;}
+	hudReset();
+	glBindTexture(GL_TEXTURE_2D, numbers->texture);
+	x += 15;
+	glTranslatef(x, y, 0);
+	glBegin(GL_QUADS);
+		glTexCoord2f(number/11, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 0); 
+		glVertex3f(xsize, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 1); 
+		glVertex3f(xsize, -ysize, 0);
+
+		glTexCoord2f(number/11, 1); 
+		glVertex3f(0, -ysize, 0);
+	glEnd();
+
+	if(num4 != NULL){number = charCheck(num4);}
+	else{return;}
+	hudReset();
+	glBindTexture(GL_TEXTURE_2D, numbers->texture);
+	x += 15;
+	glTranslatef(x, y, 0);
+	glBegin(GL_QUADS);
+		glTexCoord2f(number/11, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 0); 
+		glVertex3f(xsize, 0, 0);
+
+		glTexCoord2f((number + 1)/11, 1); 
+		glVertex3f(xsize, -ysize, 0);
+
+		glTexCoord2f(number/11, 1); 
+		glVertex3f(0, -ysize, 0);
+	glEnd();
+}
+
+float charCheck(char num)
+{
+	if(num == '-'){return -1;}
+	if(num == '0'){return 0;}
+	if(num == '1'){return 1;}
+	if(num == '2'){return 2;}
+	if(num == '3'){return 3;}
+	if(num == '4'){return 4;}
+	if(num == '5'){return 5;}
+	if(num == '6'){return 6;}
+	if(num == '7'){return 7;}
+	if(num == '8'){return 8;}
+	if(num == '9'){return 9;}
+}
+
+void hudReset()
+{
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glMatrixMode(GL_MODELVIEW);
+
 	glMatrixMode(GL_PROJECTION);
 
 	glPushMatrix();
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	drawUI();
-
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-
+	glLoadIdentity();
+	glOrtho(0.0, 1024, 0.0, 768, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
 
-	glDeleteTextures(1, &texture);
+	glPushMatrix();
+	glLoadIdentity();
+	glDisable(GL_LIGHTING);
 
-	if(message != NULL)
-	{
-		SDL_FreeSurface(message);
-		message = NULL;
-	}
-	if(screen != NULL)
-	{
-		SDL_FreeSurface(screen);
-		screen = NULL;
-	}
+	glColor3f(1,1,1);
+	glEnable(GL_TEXTURE_2D);
 }
 
-void drawUI()
+void initTextSprites()
 {
-	int i;
-	int x = 0;
-	int y = 0;
+	numbers = LoadSprite("font/numbers.png", 396, 75);
+	elev = LoadSprite("font/gunElev.png", 1000, 100);
+	enemyVec = LoadSprite("font/enemyVec.png", 1000, 100);
+	targDist = LoadSprite("font/targDist.png", 1000, 100);
+	turrRot = LoadSprite("font/turrRot.png", 1000, 100);
+}
 
-	for (i = 0; i < 3; i++)
+void HUDupdate(Ship *player, Ship *selected)
+{
+	float x, z, xdist, zdist, angle;
+	
+	x = player->hull->body.position.x;
+	z = player->hull->body.position.z;
+	xdist = (selected->hull->body.position.x - x);
+	zdist = (selected->hull->body.position.z - z);
+	if (zdist < 0)
 	{
-		if(message != NULL)
-		{
-			SDL_FreeSurface(message);
-		}
-		if(i == 0){message = TTF_RenderText_Blended(font, "Test String 1!", textColor);}
-		else if(i == 1){message = TTF_RenderText_Blended(font, "Test String 2!", textColor);}
-		else if(i == 2){message = TTF_RenderText_Blended(font, "Test String 3!", textColor);}
-		else{message = TTF_RenderText_Blended(font, "Test String!", textColor);}
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, message->w, message->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, message->pixels);
-
-		glBegin(GL_QUADS);
-		{
-			glTexCoord2f(0,0);
-			glVertex2f(x, y);
-
-			glTexCoord2f(1,0);
-			glVertex2f(x + message->w, y);
-
-			glTexCoord2f(1,1);
-			glVertex2f(x + message->w, y + message->h);
-
-			glTexCoord2f(0,1);
-			glVertex2f(x, y + message->h);
-		}
-		glEnd();
-
-		y = (i * 65);
+		zdist *= -1;
+		xdist *= -1;
+		angle = (atan(xdist/zdist) * RADTODEG);
 	}
+	else
+	{
+		angle = (atan(xdist/zdist) * RADTODEG);
+	}
+
+	targDst = sqrt((zdist * zdist) + (xdist * xdist));
+	enVec = angle;
 }
 
 /*eol@eof*/
