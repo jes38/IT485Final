@@ -458,27 +458,4 @@ void initTextSprites()
 	turrRot = LoadSprite("font/turrRot.png", 1000, 100);
 }
 
-void HUDupdate(Ship *player, Ship *selected)
-{
-	float x, z, xdist, zdist, angle;
-	
-	x = player->hull->body.position.x;
-	z = player->hull->body.position.z;
-	xdist = (selected->hull->body.position.x - x);
-	zdist = (selected->hull->body.position.z - z);
-	if (zdist < 0)
-	{
-		zdist *= -1;
-		xdist *= -1;
-		angle = (atan(xdist/zdist) * RADTODEG);
-	}
-	else
-	{
-		angle = (atan(xdist/zdist) * RADTODEG);
-	}
-
-	targDst = sqrt((zdist * zdist) + (xdist * xdist));
-	enVec = angle;
-}
-
 /*eol@eof*/

@@ -477,3 +477,21 @@ Ship *spawnIsland(Space *space, Vec3D spawnPt)
 
 	return ship;
 }
+
+void HUDupdate(Ship *player, Ship *selected)
+{
+	float x, z, xdist, zdist, angle;
+	
+	x = player->hull->body.position.x;
+	z = player->hull->body.position.z;
+	xdist = (selected->hull->body.position.x - x);
+	zdist = (selected->hull->body.position.z - z);
+	
+	angle = (atan(xdist/zdist) * RADTODEG) + shipRot;
+	angle *= -1;
+
+	if(angle > 180){angle -= 360;}
+	else if(angle < -180){angle += 360;}
+	targDst = sqrt((zdist * zdist) + (xdist * xdist));
+	enVec = angle;
+}

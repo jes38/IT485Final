@@ -105,4 +105,6 @@ void enemyTarget(Ship *ship);
 
 Ship *spawnIsland(Space *space, Vec3D spawnPt);
 
+void HUDupdate(Ship *player, Ship *selected);
+
 #endif

@@ -24,7 +24,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <GL/glew.h>
-#include "ship.h"
 
 #define EPSILON   1e-6f
 
@@ -73,6 +72,5 @@ void drawBoxes(int i);
 void drawNums(int i, char num1, char num2, char num3, char num4);
 float charCheck(char num);
 void hudReset();
-void HUDupdate(Ship *player, Ship *selected);
 
 #endif

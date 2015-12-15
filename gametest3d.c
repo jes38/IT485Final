@@ -155,13 +155,16 @@ int main(int argc, char *argv[])
 					cameraRotation.y = 0;
 					cameraRotation.z = 180;
 
+					editorselection = 0;
+					selectedShip = playerShip;
 					startLevel(space, levelselected);
 				}
 				else if (e.key.keysym.sym == SDLK_0 && editormode > 0)
 				{
 					editormode = 0;
-					editorselection = 0;
-					selectedShip = playerShip;
+					editorselection = 1;
+					editorselection = scanForNext(editorselection);
+					selectedShip = returnShip(editorselection);
 				}
 				else if (e.key.keysym.sym == SDLK_1)
 				{
@@ -326,6 +329,30 @@ int main(int argc, char *argv[])
 						{
 							turning -= 1;
 						}
+						else if (e.key.keysym.sym == SDLK_q)
+						{
+							editorselection += 1;
+							editorselection = scanForNext(editorselection);
+
+							if(editorselection == 0) //don't select the player
+							{
+								editorselection += 1;
+								editorselection = scanForNext(editorselection);
+							}
+							selectedShip = returnShip(editorselection);
+
+							if(selectedShip->shipType == 4) //don't select an island
+							{
+								editorselection += 1;
+								editorselection = scanForNext(editorselection);
+								if(editorselection == 0)
+								{
+									editorselection += 1;
+									editorselection = scanForNext(editorselection);
+								}
+								selectedShip = returnShip(editorselection);
+							}
+						}
 						else if (e.key.keysym.sym == SDLK_c && turretRot < 135)
 						{
 							turretRot += 1;
@@ -421,14 +448,14 @@ int main(int argc, char *argv[])
 
 		if(turning > 0)
 		{
-			shipRot += 0.07;
+			shipRot += 0.1;
 			if(shipRot >= 360){shipRot -= 360;}
 			playerShip->rot = shipRot;
 		}
 		else if(turning < 0)
 		{
-			shipRot -= 0.07;
-			if(shipRot >= 360){shipRot -= 360;}
+			shipRot -= 0.1;
+			if(shipRot < 0){shipRot += 360;}
 			playerShip->rot = shipRot;
 		}
 		 
