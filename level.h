@@ -8,8 +8,12 @@
  * @param space The space to add the level's ships to
  * @param levNum The number of the level you wish to start (from 1 - 3)
  */
-
 void startLevel(Space *space, int levNum);
+
+/**
+ * @brief save the level to a file
+ * @param levNum the level number
+ */
 void saveLevel(int levNum);
 
 #endif

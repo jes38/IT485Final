@@ -66,12 +66,39 @@ void graphics3d_next_frame();
 ////////////
 //UI STUFF//
 ////////////
+/**
+ * @brief initialize all sprites
+ */
 void initTextSprites();
+
+/**
+ * @brief draw all HUD components
+ */
 void DrawUI();
+
+/**
+ * @brief draw the boxes where the numbers will go
+ */
 void drawBoxes(int i);
+
+/**
+ * @brief determine what numbers to draw, and draw the numbers in the boxes
+ */
 void drawNums(int i, char num1, char num2, char num3, char num4);
+
+/**
+ * @brief convert from character to number
+ */
 float charCheck(char num);
+
+/**
+ * @brief called in drawNums() to enable drawing multiple numbers
+ */
 void hudReset();
+
+/**
+ * @brief draw the sky (but it'll only draw over the models, so it doesn't work right now)
+ */
 void drawSky();
 
 #endif

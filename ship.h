@@ -26,14 +26,14 @@ typedef struct Ship_S
 
 Ship *shipList;
 
-float shipVel;
-float shipRot;
-float turretRot;
-float gunElev;
+float shipVel; //players ship velocity
+float shipRot; //player's rotation
+float turretRot; //player's turret rotation
+float gunElev; //player's gun elevation
 int numShips; //does not include player
 float realTurrRot;
-float targDst;
-float enVec;
+float targDst; //distance of target from player (for HUD)
+float enVec; //vector of target from player (for HUD)
 
 /**
  * @brief add a ship to the ship list
@@ -99,14 +99,37 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType, float rotation);
  */
 int scanForNext(int start);
 
+/**
+ * @brief return pointer to a ship based on id
+ * @param id the id of the requested ship
+ */
 Ship *returnShip(int id);
 
+/**
+ * @brief AI targeting function
+ * @param the AI ship that's doing the targeting
+ */
 void enemyTarget(Ship *ship);
 
+/**
+ * @brief similar to spawning a ship, but spawns an island
+ * @param space space to spawn the island
+ * @param spawnPt where to spawn the island
+ */
 Ship *spawnIsland(Space *space, Vec3D spawnPt);
 
+/**
+ * @brief update the values for the HUD
+ * @param player pointer to player
+ * @param selected pointer to selected ship
+ */
 void HUDupdate(Ship *player, Ship *selected);
 
+/**
+ * @brief swap the players ship to another ship
+ * @param curPlayer pointer to (current) player
+ * @param selected pointer to the ship that will be the player
+ */
 void swapShips(Ship *curPlayer, Ship *selected);
 
 #endif

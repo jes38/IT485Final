@@ -7,7 +7,7 @@ typedef struct Space_S Space;
 
 
 Space *space_new();
-Space *gameSpace;
+Space *gameSpace; //pointer to the main game space
 
 void space_free(Space *space);
 void touch_callback(void *data, void *context);

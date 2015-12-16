@@ -105,6 +105,30 @@ int main(int argc, char *argv[])
         }
 		updateAllShipComp();
 		applyGrav();
+		if(selectedShip->inuse == 0)
+		{
+			editorselection += 1;
+			editorselection = scanForNext(editorselection);
+
+			if(selectedShip->shipID == 0) //don't select the player
+			{
+				editorselection += 1;
+				editorselection = scanForNext(editorselection);
+			}
+			selectedShip = returnShip(editorselection);
+
+			if(selectedShip->shipType == 4) //don't select an island
+			{
+				editorselection += 1;
+				editorselection = scanForNext(editorselection);
+				if(editorselection == 0)
+				{
+					editorselection += 1;
+					editorselection = scanForNext(editorselection);
+				}
+				selectedShip = returnShip(editorselection);
+			}
+		}
 		HUDupdate(playerShip, selectedShip);
 
 		if(AIcounter == 101)

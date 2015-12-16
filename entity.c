@@ -117,7 +117,7 @@ void applyGrav()
 			bullet = &__entity_list[i];
 			bullet->health -= 1;
 			//bullet->body.velocity.y -= 0.005;
-			//if(bullet->body.position.y < -5){entity_free(bullet);}
+			//if(bullet->body.position.y < -5){space_remove_body(gameSpace, &bullet->body); entity_free(bullet);}
 
 			if(bullet->health <= 0)
 			{

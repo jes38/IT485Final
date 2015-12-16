@@ -55,8 +55,14 @@ void entity_free(Entity *ent);
 
 int entity_is_entity(void *data);
 
+/**
+ * @brief applies gravity to bullets
+ */
 void applyGrav();
 
+/**
+ * @brief destroy an entity by its uid
+ */
 void destEntID(int id);
 
 #endif

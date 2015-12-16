@@ -528,4 +528,11 @@ void swapShips(Ship *curPlayer, Ship *selected)
 	selected->hull->body.id = 0;
 	selected->turret->body.id = 0;
 	selected->gun->body.id = 0;
+
+	shipRot = selected->rot;
+	while(shipRot > 360 || shipRot < 0)
+	{
+		if(shipRot < 0){shipRot += 360;}
+		else if(shipRot > 360){shipRot -= 360;}
+	}
 }
