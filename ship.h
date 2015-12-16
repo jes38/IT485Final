@@ -107,4 +107,6 @@ Ship *spawnIsland(Space *space, Vec3D spawnPt);
 
 void HUDupdate(Ship *player, Ship *selected);
 
+void swapShips(Ship *curPlayer, Ship *selected);
+
 #endif

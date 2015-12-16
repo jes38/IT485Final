@@ -313,19 +313,19 @@ int main(int argc, char *argv[])
 
 					else if(!specMode)
 					{
-						if (e.key.keysym.sym == SDLK_w && shipVel < 0.4)
+						if (e.key.keysym.sym == SDLK_w && shipVel < 0.4 && playerShip->shipType != 3)
 						{
 							shipVel += 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_s && shipVel > -0.05)
+						else if (e.key.keysym.sym == SDLK_s && shipVel > -0.05 && playerShip->shipType != 3)
 						{
 							shipVel -= 0.1;
 						}
-						else if (e.key.keysym.sym == SDLK_d && turning < 1)
+						else if (e.key.keysym.sym == SDLK_d && turning < 1 && playerShip->shipType != 3)
 						{
 							turning += 1;
 						}
-						else if (e.key.keysym.sym == SDLK_a && turning > -1)
+						else if (e.key.keysym.sym == SDLK_a && turning > -1 && playerShip->shipType != 3)
 						{
 							turning -= 1;
 						}
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 							editorselection += 1;
 							editorselection = scanForNext(editorselection);
 
-							if(editorselection == 0) //don't select the player
+							if(selectedShip->shipID == 0) //don't select the player
 							{
 								editorselection += 1;
 								editorselection = scanForNext(editorselection);
@@ -376,6 +376,12 @@ int main(int argc, char *argv[])
 						else if (e.key.keysym.sym == SDLK_b)
 						{
 							fireBullet(space, playerShip->hull->body.position, shipRot, 0, 0, -2);
+						}
+						else if (e.key.keysym.sym == SDLK_e)
+						{
+							swapShips(playerShip, selectedShip);
+							selectedShip = returnShip(0);
+							playerShip = returnShip(0);
 						}
 					}
 				}
@@ -458,14 +464,16 @@ int main(int argc, char *argv[])
 			if(shipRot < 0){shipRot += 360;}
 			playerShip->rot = shipRot;
 		}
-		 
+
         graphics3d_frame_begin();
-        
+
+		//drawSky(); //just draws over everything. Never mind.
+
         glPushMatrix();
         set_camera(
             cameraPosition,
             cameraRotation);
-        
+
         entity_draw_all();
         if (r > 360)r -= 360;
 

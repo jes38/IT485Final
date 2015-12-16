@@ -30,6 +30,7 @@ Sprite *elev;
 Sprite *targDist;
 Sprite *turrRot;
 Sprite *negative;
+Sprite *sky;
 
 int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 frameDelay)
 {
@@ -456,6 +457,49 @@ void initTextSprites()
 	enemyVec = LoadSprite("font/enemyVec.png", 1000, 100);
 	targDist = LoadSprite("font/targDist.png", 1000, 100);
 	turrRot = LoadSprite("font/turrRot.png", 1000, 100);
+	sky = LoadSprite("models/sky.png", 1024, 768);
+}
+
+void drawSky()
+{
+	glMatrixMode(GL_PROJECTION);
+
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0.0, 1024, 0.0, 768, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+
+	glPushMatrix();
+	glLoadIdentity();
+	glDisable(GL_LIGHTING);
+
+	glColor3f(1,1,1);
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, sky->texture);
+	glTranslatef(0, 768, 0);
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0, 0); 
+		glVertex3f(0, 0, 0);
+
+		glTexCoord2f(1, 0); 
+		glVertex3f(1024, 0, 0);
+
+		glTexCoord2f(1, 1); 
+		glVertex3f(1024, -768, 0);
+
+		glTexCoord2f(0, 1); 
+		glVertex3f(0, -768, 0);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glMatrixMode(GL_MODELVIEW);
 }
 
 /*eol@eof*/

@@ -72,5 +72,6 @@ void drawBoxes(int i);
 void drawNums(int i, char num1, char num2, char num3, char num4);
 float charCheck(char num);
 void hudReset();
+void drawSky();
 
 #endif

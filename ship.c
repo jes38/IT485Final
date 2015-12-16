@@ -487,11 +487,45 @@ void HUDupdate(Ship *player, Ship *selected)
 	xdist = (selected->hull->body.position.x - x);
 	zdist = (selected->hull->body.position.z - z);
 	
-	angle = (atan(xdist/zdist) * RADTODEG) + shipRot;
+	if(zdist < 0 && xdist > 0)
+	{
+		angle = (atan(xdist/zdist) * RADTODEG) + 180;
+	}
+	else if(zdist < 0)
+	{
+		angle = (atan(zdist/xdist) * RADTODEG) + 90;
+		angle *= -1;
+	}
+	else
+	{
+		angle = (atan(xdist/zdist) * RADTODEG);
+	}
 	angle *= -1;
+	angle -= shipRot;
 
-	if(angle > 180){angle -= 360;}
-	else if(angle < -180){angle += 360;}
+	if(angle < -180)
+	{
+		angle += 360;
+	}
 	targDst = sqrt((zdist * zdist) + (xdist * xdist));
 	enVec = angle;
+}
+
+void swapShips(Ship *curPlayer, Ship *selected)
+{
+	curPlayer->shipID = selected->shipID;
+	curPlayer->hull->uid = curPlayer->shipID;
+	curPlayer->turret->uid = curPlayer->shipID;
+	curPlayer->gun->uid = curPlayer->shipID;
+	curPlayer->hull->body.id = curPlayer->shipID;
+	curPlayer->turret->body.id = curPlayer->shipID;
+	curPlayer->gun->body.id = curPlayer->shipID;
+
+	selected->shipID = 0;
+	selected->hull->uid = 0;
+	selected->turret->uid = 0;
+	selected->gun->uid = 0;
+	selected->hull->body.id = 0;
+	selected->turret->body.id = 0;
+	selected->gun->body.id = 0;
 }
